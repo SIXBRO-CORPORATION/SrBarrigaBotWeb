@@ -187,7 +187,7 @@ export default function StudentsPage() {
                 onClose={() => setRemovingStudent(null)}
                 onConfirm={handleConfirmRemove}
                 title="REMOVER ALUNO"
-                description={`Tem certeza que deseja remover ${removingStudent?.name ?? 'este aluno'}? Ele deixa de ser cobrado, mas o histórico de pagamentos é mantido.`}
+                description={`Tem certeza que deseja remover ${removingStudent?.name ?? 'este aluno'}? Ele deixa de ser cobrado, mas o histórico de pagamentos é mantido`}
                 confirmLabel="REMOVER"
                 loading={removeMutation.isPending}
                 variant="danger"
