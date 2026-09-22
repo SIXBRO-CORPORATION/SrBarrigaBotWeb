@@ -1,55 +1,51 @@
-export type StudentStatus = 'em_dia' | 'devendo' | 'atrasado';
+export type BillingStatus = 'EM_DIA' | 'ATRASADO' | 'ADIANTADO';
 
 export interface Student {
     id: string;
     name: string;
+    matricula: string;
     phone: string;
-    monthlyFee: number;
-    startDate: string;
-    status: StudentStatus;
+    active: boolean;
+    inactivatedAt: string | null;
     createdAt: string;
-    updatedAt: string;
 }
 
 export interface StudentSummary {
-    id: string;
-    name: string;
-    phone: string;
-    status: StudentStatus;
-    balance: number;
+    student: Student;
+    mesesDevidos: number;
+    valorEsperadoAcumulado: number;
+    valorPagoAcumulado: number;
+    saldo: number;
+    valorAtraso: number;
+    status: BillingStatus;
 }
 
 export interface StudentMonthStatus {
-    month: string;
-    status: 'pago' | 'devendo' | 'atrasado';
-    amountDue: number;
-    amountPaid: number;
+    numero: number;
+    referencia: string;
+    status: 'OK' | 'PENDENTE';
 }
 
 export interface StudentDetail {
-    id: string;
-    name: string;
-    phone: string;
-    monthlyFee: number;
-    startDate: string;
-    status: StudentStatus;
-    balance: number;
+    student: Student;
+    mesesDevidos: number;
+    valorEsperadoAcumulado: number;
+    valorPagoAcumulado: number;
+    saldo: number;
+    valorAtraso: number;
+    status: BillingStatus;
     statusMesAMes: StudentMonthStatus[];
     payments: import('@/types/payment').Payment[];
-    createdAt: string;
-    updatedAt: string;
 }
 
 export interface CreateStudentRequest {
     name: string;
+    matricula: string;
     phone: string;
-    monthlyFee: number;
-    startDate: string;
 }
 
 export interface UpdateStudentRequest {
     name?: string;
+    matricula?: string;
     phone?: string;
-    monthlyFee?: number;
-    startDate?: string;
 }

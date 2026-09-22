@@ -1,15 +1,15 @@
 export interface SystemConfig {
-    defaultMonthlyFee: number;
-    billingStartDay: number;
-    chargeExecutionDay: number;
-    chargeExecutionTime: string;
-    messageTemplate: string;
+    key: string;
+    value: string;
+    modifiedAt: string;
 }
 
 export interface UpdateConfigRequest {
-    defaultMonthlyFee?: number;
-    billingStartDay?: number;
-    chargeExecutionDay?: number;
-    chargeExecutionTime?: string;
-    messageTemplate?: string;
+    key: string;
+    value: string;
 }
+
+export const SYSTEM_CONFIG_KEYS = {
+    MONTHLY_FEE: 'monthly_fee',
+    BILLING_START_DATE: 'billing_start_date',
+} as const;

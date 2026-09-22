@@ -4,14 +4,14 @@ import type { UpdateConfigRequest } from '@/types/config';
 
 export const CONFIG_QUERY_KEY = 'config';
 
-export const useConfig = () => {
+export const useSystemConfig = () => {
     return useQuery({
         queryKey: [CONFIG_QUERY_KEY],
-        queryFn: configService.get,
+        queryFn: configService.list,
     });
 };
 
-export const useUpdateConfig = () => {
+export const useUpdateSystemConfig = () => {
     const queryClient = useQueryClient();
 
     return useMutation({

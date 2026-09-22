@@ -34,7 +34,8 @@ export const studentService = {
         return response.data!;
     },
 
-    remove: async (id: string): Promise<void> => {
-        await httpClient.delete(`/students/${id}`);
+    remove: async (id: string): Promise<Student> => {
+        const response = await httpClient.delete<Student>(`/students/${id}`);
+        return response.data!;
     },
 };

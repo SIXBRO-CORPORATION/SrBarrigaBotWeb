@@ -18,7 +18,8 @@ export const paymentService = {
         return response.data!;
     },
 
-    remove: async (paymentId: string): Promise<void> => {
-        await httpClient.delete(`/payments/${paymentId}`);
+    remove: async (paymentId: string): Promise<Payment> => {
+        const response = await httpClient.delete<Payment>(`/payments/${paymentId}`);
+        return response.data!;
     },
 };
