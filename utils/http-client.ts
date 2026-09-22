@@ -69,7 +69,7 @@ class HttpClient {
 
         const requestHeaders = new Headers(headers as HeadersInit);
 
-        if (!requestHeaders.has('Content-Type')) {
+        if (!requestHeaders.has('Content-Type') && !(restConfig.body instanceof FormData)) {
             requestHeaders.set('Content-Type', 'application/json');
         }
 
@@ -172,6 +172,18 @@ class HttpClient {
 
     async delete<T>(endpoint: string, config?: RequestConfig): Promise<ApiResponse<T>> {
         return this.request<T>(endpoint, { ...config, method: 'DELETE' });
+    }
+
+    async postForm<T>(
+        endpoint: string,
+        formData: FormData,
+        config?: RequestConfig
+    ): Promise<ApiResponse<T>> {
+        return this.request<T>(endpoint, {
+            ...config,
+            method: 'POST',
+            body: formData,
+        });
     }
 }
 
