@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
             await authService.login(credentials);
             await fetchUser();
-            router.push('/');
+            router.push('/dashboard');
         } catch (error) {
             setIsLoading(false);
             throw error;

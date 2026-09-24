@@ -10,7 +10,7 @@ import { useExecuteCharge } from '@/hooks/useWhatsapp';
 import { useToast } from '@/providers/ToastProvider';
 import QRCode from 'react-qr-code';
 
-export default function HomePage() {
+export default function WhatsAppPage() {
     const {
         status,
         qrCode,
@@ -73,7 +73,7 @@ export default function HomePage() {
                 {/* Header */}
                 <div className="border-b-2 border-white/20 pb-6">
                     <h1 className="text-3xl lg:text-4xl mb-2 text-white">
-                        DASHBOARD
+                        WHATSAPP
                     </h1>
                     <p className="text-sm tech-text text-white/50 tracking-wider">
                         SISTEMA DE LEMBRETES AUTOMÁTICOS

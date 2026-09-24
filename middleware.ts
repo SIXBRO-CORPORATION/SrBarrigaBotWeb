@@ -34,7 +34,7 @@ export default function middleware(request: NextRequest) {
 
     if (isAuthenticated && isPublicRoute) {
         const redirectUrl = request.nextUrl.clone();
-        redirectUrl.pathname = "/";
+        redirectUrl.pathname = "/dashboard";
         return NextResponse.redirect(redirectUrl);
     }
 
