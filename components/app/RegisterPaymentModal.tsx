@@ -90,7 +90,7 @@ function RegisterPaymentFields({ studentId, onDone, onCancel }: RegisterPaymentF
         }
 
         if (!formData.paidAt) {
-            newErrors.paidAt = 'Data do pagamento é obrigatória';
+            newErrors.paidAt = 'Data do payment é obrigatória';
         }
 
         setErrors(newErrors);
@@ -120,7 +120,7 @@ function RegisterPaymentFields({ studentId, onDone, onCancel }: RegisterPaymentF
             });
             onDone();
         } catch (error) {
-            console.log(error instanceof Error ? error.message : 'Erro ao registrar pagamento');
+            console.log(error instanceof Error ? error.message : 'Erro ao registrar payment');
         }
     };
 

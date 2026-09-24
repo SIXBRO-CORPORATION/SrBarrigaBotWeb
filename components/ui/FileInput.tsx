@@ -27,8 +27,9 @@ interface FileInputRootProps {
     onChange: (file: File | null) => void;
     error?: string;
     disabled?: boolean;
-    /** Abre a câmera direto no mobile, em vez de só a galeria. */
     captureEnvironment?: boolean;
+    placeholder?: string;
+    hint?: string;
 }
 
 const FileInputRoot: React.FC<FileInputRootProps> = ({
@@ -38,6 +39,8 @@ const FileInputRoot: React.FC<FileInputRootProps> = ({
     error,
     disabled = false,
     captureEnvironment = false,
+    placeholder = 'Clique ou arraste o comprovante (opcional)',
+    hint = 'JPG, PNG, WEBP ou PDF — até 10MB',
 }) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const [localError, setLocalError] = useState<string | null>(null);
@@ -125,9 +128,9 @@ const FileInputRoot: React.FC<FileInputRootProps> = ({
                 ) : (
                     <div className="flex-1">
                         <p className="text-sm text-white/70 body-text">
-                            Clique ou arraste o comprovante (opcional)
+                            {placeholder}
                         </p>
-                        <p className="text-xs text-white/40">JPG, PNG, WEBP ou PDF — até 10MB</p>
+                        <p className="text-xs text-white/40">{hint}</p>
                     </div>
                 )}
 

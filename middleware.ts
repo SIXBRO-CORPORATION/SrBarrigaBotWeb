@@ -6,7 +6,9 @@ interface JwtPayload {
     exp: number;
 }
 
-const publicRoutes = ['/login'];
+const publicRoutes = ['/login', '/payment'];
+
+const guestOnlyRoutes = ['/login'];
 const REDIRECT_WHEN_NOT_AUTHENTICATED = "/login";
 
 function isTokenExpired(token: string): boolean {
@@ -32,7 +34,9 @@ export default function middleware(request: NextRequest) {
         return NextResponse.redirect(redirectUrl);
     }
 
-    if (isAuthenticated && isPublicRoute) {
+    const isGuestOnlyRoute = guestOnlyRoutes.includes(path);
+
+    if (isAuthenticated && isGuestOnlyRoute) {
         const redirectUrl = request.nextUrl.clone();
         redirectUrl.pathname = "/dashboard";
         return NextResponse.redirect(redirectUrl);

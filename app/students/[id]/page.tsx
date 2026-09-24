@@ -91,7 +91,7 @@ export default function StudentDetailPage() {
             await removeMutation.mutateAsync(removingPayment.id);
             setRemovingPayment(null);
         } catch (error) {
-            console.log(error instanceof Error ? error.message : 'Erro ao estornar pagamento');
+            console.log(error instanceof Error ? error.message : 'Erro ao estornar payment');
         }
     };
 
