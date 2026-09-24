@@ -10,6 +10,7 @@ import { Loading } from '@/components/ui/Loading';
 import { RegisterPaymentModal } from '@/components/app/RegisterPaymentModal';
 import { MonthTimelineGrid } from '@/components/app/MonthTimelineGrid';
 import { ConfirmDialog } from '@/components/app/ConfirmDialog';
+import { ReceiptPreview } from '@/components/app/ReceiptPreview';
 import { useStudentDetail } from '@/hooks/useStudents';
 import { useStudentPayments, useRemovePayment } from '@/hooks/usePayments';
 import type { BillingStatus } from '@/types/student';
@@ -49,11 +50,39 @@ export default function StudentDetailPage() {
     const studentId = params.id;
 
     const { data: detail, isLoading: isLoadingDetail, isError: isDetailError } = useStudentDetail(studentId);
-    const { data: payments, isLoading: isLoadingPayments, isError: isPaymentsError } = useStudentPayments(studentId);
+    const {
+        data: payments,
+        isLoading: isLoadingPayments,
+        isFetching: isFetchingPayments,
+        isError: isPaymentsError,
+        refetch: refetchPayments,
+    } = useStudentPayments(studentId);
     const removeMutation = useRemovePayment(studentId);
 
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [removingPayment, setRemovingPayment] = useState<Payment | null>(null);
+    const [previewPaymentId, setPreviewPaymentId] = useState<string | null>(null);
+    const [openingReceiptId, setOpeningReceiptId] = useState<string | null>(null);
+
+    // Derivado do cache: quando a query é refeita, a preview passa a usar a signed URL nova.
+    const previewPayment = payments?.find((payment) => payment.id === previewPaymentId) ?? null;
+
+    // A signed URL do comprovante expira, então a lista é refeita antes de abrir a preview
+    // para garantir um link válido mesmo com a tela aberta há muito tempo.
+    const handleOpenReceipt = async (payment: Payment) => {
+        setOpeningReceiptId(payment.id);
+        try {
+            const result = await refetchPayments();
+            if (result.isError) return;
+
+            const fresh = result.data?.find((item) => item.id === payment.id);
+            if (fresh?.receiptUrl) {
+                setPreviewPaymentId(fresh.id);
+            }
+        } finally {
+            setOpeningReceiptId(null);
+        }
+    };
 
     const handleConfirmRemove = async () => {
         if (!removingPayment) return;
@@ -180,17 +209,22 @@ export default function StudentDetailPage() {
                                         </Table.Cell>
                                         <Table.Cell>
                                             {payment.receiptUrl ? (
-                                                <a
-                                                    href={payment.receiptUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-flex items-center gap-1 text-white/70 hover:text-white hover:underline"
+                                                <button
+                                                    onClick={() => handleOpenReceipt(payment)}
+                                                    disabled={openingReceiptId === payment.id}
+                                                    className="inline-flex items-center gap-1 text-white/70 hover:text-white hover:underline disabled:opacity-50 disabled:cursor-wait"
+                                                    aria-label={`Ver comprovante do pagamento de ${formatCurrency(payment.amount)}`}
                                                 >
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                                                        <path strokeLinecap="square" strokeLinejoin="miter" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                                    </svg>
+                                                    {openingReceiptId === payment.id ? (
+                                                        <Loading.Root size="sm" />
+                                                    ) : (
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                                                            <path strokeLinecap="square" strokeLinejoin="miter" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                            <path strokeLinecap="square" strokeLinejoin="miter" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                        </svg>
+                                                    )}
                                                     VER
-                                                </a>
+                                                </button>
                                             ) : (
                                                 <span className="text-white/30">—</span>
                                             )}
@@ -218,6 +252,15 @@ export default function StudentDetailPage() {
                 open={isPaymentModalOpen}
                 onClose={() => setIsPaymentModalOpen(false)}
                 studentId={studentId}
+            />
+
+            <ReceiptPreview
+                open={!!previewPayment?.receiptUrl}
+                onClose={() => setPreviewPaymentId(null)}
+                receiptUrl={previewPayment?.receiptUrl ?? null}
+                subtitle={previewPayment ? `${formatCurrency(previewPayment.amount)} · ${formatDate(previewPayment.paidAt)}` : undefined}
+                onRefresh={() => refetchPayments()}
+                isRefreshing={isFetchingPayments}
             />
 
             <ConfirmDialog
