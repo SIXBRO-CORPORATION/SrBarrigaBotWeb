@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { tokenManager } from '@/utils/token-manager';
+import type { ChargeProgress } from '@/types/whatsapp';
 
 interface WhatsAppStatus {
     isConnected: boolean;
@@ -21,6 +22,12 @@ export const useWhatsAppWebSocket = () => {
     const [isDisconnecting, setIsDisconnecting] = useState(false);
     const [isExecutingCharge, setIsExecutingCharge] = useState(false);
     const [isLoadingInitialStatus, setIsLoadingInitialStatus] = useState(true);
+    const [charge, setCharge] = useState<ChargeProgress>({
+        status: 'idle',
+        total: 0,
+        sent: 0,
+        failed: 0,
+    });
 
     const socketRef = useRef<Socket | null>(null);
 
@@ -69,6 +76,10 @@ export const useWhatsAppWebSocket = () => {
             console.log('QR Code received');
             setQrCode(data.qrCode);
             setIsLoadingInitialStatus(false);
+        });
+
+        socket.on('whatsapp:charge', (data: ChargeProgress) => {
+            setCharge(data);
         });
 
         return () => {
@@ -139,6 +150,7 @@ export const useWhatsAppWebSocket = () => {
         isConnecting,
         isDisconnecting,
         isLoadingInitialStatus,
+        charge,
         connect,
         disconnect,
         refreshStatus,

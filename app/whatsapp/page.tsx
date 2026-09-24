@@ -8,6 +8,7 @@ import { Modal } from '@/components/ui/Modal';
 import { useWhatsAppWebSocket } from '@/hooks/useWhatsAppWebSocket';
 import { useExecuteCharge } from '@/hooks/useWhatsapp';
 import { useToast } from '@/providers/ToastProvider';
+import type { ChargeStatus } from '@/types/whatsapp';
 import QRCode from 'react-qr-code';
 
 export default function WhatsAppPage() {
@@ -17,12 +18,14 @@ export default function WhatsAppPage() {
         isConnecting,
         isDisconnecting,
         isLoadingInitialStatus,
+        charge,
         connect,
         disconnect
     } = useWhatsAppWebSocket();
 
     const executeChargeMutation = useExecuteCharge();
-    const { success, error: showError } = useToast();
+    const { success, error: showError, info, warning } = useToast();
+    const previousChargeStatus = React.useRef<ChargeStatus | null>(null);
     const [showQRModal, setShowQRModal] = useState(false);
     const [showDisconnectModal, setShowDisconnectModal] = useState(false);
 
@@ -65,7 +68,29 @@ export default function WhatsAppPage() {
         }
     }, [status.isConnected, showQRModal]);
 
+    React.useEffect(() => {
+        const previous = previousChargeStatus.current;
+        previousChargeStatus.current = charge.status;
+
+        if (previous !== 'running') return;
+
+        if (charge.status === 'completed') {
+            if (charge.total === 0) {
+                info('Nenhum aluno a cobrar no momento');
+            } else if (charge.failed > 0) {
+                warning(`Cobrança concluída: ${charge.sent} enviada(s) e ${charge.failed} com falha`, 8000);
+            } else {
+                success(`Cobrança concluída: ${charge.sent} mensagem(ns) enviada(s)`);
+            }
+        } else if (charge.status === 'failed') {
+            showError(charge.error || 'Falha ao executar cobrança', 8000);
+        }
+    }, [charge, info, warning, success, showError]);
+
     const isConnected = status.isConnected;
+    const isChargeRunning = charge.status === 'running';
+    const chargeDone = charge.sent + charge.failed;
+    const chargeProgressPercent = charge.total > 0 ? Math.round((chargeDone / charge.total) * 100) : 0;
 
     return (
         <DashboardLayout>
@@ -164,8 +189,8 @@ export default function WhatsAppPage() {
                                             variant="primary"
                                             size="md"
                                             onClick={handleExecuteCharge}
-                                            loading={executeChargeMutation.isPending}
-                                            disabled={executeChargeMutation.isPending}
+                                            loading={executeChargeMutation.isPending || isChargeRunning}
+                                            disabled={executeChargeMutation.isPending || isChargeRunning}
                                         >
                                             <Button.Icon>
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
@@ -179,7 +204,7 @@ export default function WhatsAppPage() {
                                             variant="danger"
                                             size="md"
                                             onClick={() => setShowDisconnectModal(true)}
-                                            disabled={isDisconnecting}
+                                            disabled={isDisconnecting || isChargeRunning}
                                         >
                                             <Button.Icon>
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
@@ -189,6 +214,25 @@ export default function WhatsAppPage() {
                                             <Button.Text>DESCONECTAR</Button.Text>
                                         </Button.Root>
                                     </div>
+
+                                    {isChargeRunning && (
+                                        <div className="pt-2 space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs tech-text tracking-wider text-white/70">
+                                                    ENVIANDO COBRANÇA EM SEGUNDO PLANO
+                                                </span>
+                                                <span className="text-xs tech-text tracking-wider text-white/70">
+                                                    {charge.total > 0 ? `${chargeDone}/${charge.total}` : 'BUSCANDO ALUNOS...'}
+                                                </span>
+                                            </div>
+                                            <div className="h-1 bg-white/10">
+                                                <div
+                                                    className="h-full bg-white transition-all duration-500"
+                                                    style={{ width: `${chargeProgressPercent}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="space-y-4">
