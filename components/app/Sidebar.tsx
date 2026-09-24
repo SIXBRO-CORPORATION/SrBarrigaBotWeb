@@ -71,7 +71,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                         <div className="flex items-center gap-3">
                             <div className="relative w-10 h-10 bg-white flex items-center justify-center chamfer-sm">
                                 <div className="w-8 h-8 bg-[#0A0A0A] flex items-center justify-center chamfer-sm">
-                                    <img src="logo.png" className="w-8 h-8" />
+                                    <img src="/logo.png" className="w-8 h-8" />
                                 </div>
                             </div>
 

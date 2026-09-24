@@ -86,7 +86,7 @@ export default function LoginPage() {
                                     <div className="absolute inset-0 bg-white/20 blur-xl" />
                                     <div className="relative w-20 h-20 bg-white flex items-center justify-center chamfer">
                                         <div className="w-16 h-16 bg-[#0A0A0A] flex items-center justify-center chamfer-sm">
-                                            <img alt="Logo Computaria" src="logo.png" className="w-20 h-16" />
+                                            <img alt="Logo Computaria" src="/logo.png" className="w-20 h-16" />
                                         </div>
                                     </div>
                                 </div>
