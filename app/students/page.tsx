@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { DashboardLayout } from '@/components/app/Layout';
 import { Button } from '@/components/ui/Button';
 import { Table } from '@/components/ui/Table';
@@ -131,7 +132,14 @@ export default function StudentsPage() {
                         <tbody>
                             {students.map((summary: StudentSummary) => (
                                 <Table.Row key={summary.student.id}>
-                                    <Table.Cell>{summary.student.name}</Table.Cell>
+                                    <Table.Cell>
+                                        <Link
+                                            href={`/students/${summary.student.id}`}
+                                            className="hover:underline"
+                                        >
+                                            {summary.student.name}
+                                        </Link>
+                                    </Table.Cell>
                                     <Table.Cell>{summary.student.matricula}</Table.Cell>
                                     <Table.Cell>{summary.student.phone}</Table.Cell>
                                     <Table.Cell>
