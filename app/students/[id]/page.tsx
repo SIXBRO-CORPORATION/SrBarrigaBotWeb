@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Table } from '@/components/ui/Table';
 import { Loading } from '@/components/ui/Loading';
 import { RegisterPaymentModal } from '@/components/app/RegisterPaymentModal';
+import { MonthTimelineGrid } from '@/components/app/MonthTimelineGrid';
 import { ConfirmDialog } from '@/components/app/ConfirmDialog';
 import { useStudentDetail } from '@/hooks/useStudents';
 import { useStudentPayments, useRemovePayment } from '@/hooks/usePayments';
@@ -123,6 +124,15 @@ export default function StudentDetailPage() {
                         </div>
                     )}
                 </div>
+
+                {!isLoadingDetail && !isDetailError && detail && (
+                    <div className="space-y-4">
+                        <h2 className="text-lg tech-text text-white/70 tracking-wider">
+                            MÊS A MÊS
+                        </h2>
+                        <MonthTimelineGrid months={detail.statusMesAMes} />
+                    </div>
+                )}
 
                 <div className="space-y-4">
                     <h2 className="text-lg tech-text text-white/70 tracking-wider">
