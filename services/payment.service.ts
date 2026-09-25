@@ -22,4 +22,19 @@ export const paymentService = {
         const response = await httpClient.delete<Payment>(`/payments/${paymentId}`);
         return response.data!;
     },
+
+    listPending: async (): Promise<Payment[]> => {
+        const response = await httpClient.get<Payment[]>('/payments/pending');
+        return response.data ?? [];
+    },
+
+    approve: async (paymentId: string): Promise<Payment> => {
+        const response = await httpClient.patch<Payment>(`/payments/${paymentId}/approve`);
+        return response.data!;
+    },
+
+    reject: async (paymentId: string, reason?: string): Promise<Payment> => {
+        const response = await httpClient.patch<Payment>(`/payments/${paymentId}/reject`, { reason });
+        return response.data!;
+    },
 };
