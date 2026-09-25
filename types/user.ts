@@ -2,7 +2,7 @@ export interface User {
     id: string;
     name: string;
     email: string;
-    created_at: string;
+    createdAt: string;
 }
 
 export interface CreateUserRequest {
@@ -11,6 +11,8 @@ export interface CreateUserRequest {
     password: string;
 }
 
-export interface DeleteUserRequest {
-    email_confirmation: string;
+export interface UpdateUserRequest {
+    name?: string;
+    email?: string;
+    password?: string;
 }

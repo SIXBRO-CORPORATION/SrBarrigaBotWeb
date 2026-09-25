@@ -58,6 +58,16 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             )
         },
         {
+            name: 'COMISSÃO',
+            path: '/comittee',
+            icon: (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                    <path strokeLinecap="square" strokeLinejoin="miter" d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
+                    <path strokeLinecap="square" strokeLinejoin="miter" d="M5 21v-1a5 5 0 015-5h4a5 5 0 015 5v1M12 3l2.5 2.5L12 8l-2.5-2.5L12 3z" />
+                </svg>
+            ),
+        },
+        {
             name: 'CONFIGURAÇÕES',
             path: '/settings',
             icon: (
