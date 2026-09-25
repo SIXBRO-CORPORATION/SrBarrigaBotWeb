@@ -6,7 +6,7 @@ interface JwtPayload {
     exp: number;
 }
 
-const publicRoutes = ['/login', '/payment'];
+const publicRoutes = ['/login', '/public/payment'];
 
 const guestOnlyRoutes = ['/login'];
 const REDIRECT_WHEN_NOT_AUTHENTICATED = "/login";
