@@ -14,7 +14,7 @@ import { ReceiptPreview } from '@/components/app/ReceiptPreview';
 import { useStudentDetail } from '@/hooks/useStudents';
 import { useStudentPayments, useRemovePayment } from '@/hooks/usePayments';
 import type { BillingStatus } from '@/types/student';
-import type { Payment } from '@/types/payment';
+import type { Payment, PaymentStatus } from '@/types/payment';
 
 const STATUS_LABEL: Record<BillingStatus, string> = {
     EM_DIA: 'EM DIA',
@@ -26,6 +26,18 @@ const STATUS_STYLE: Record<BillingStatus, string> = {
     EM_DIA: 'border-green-500 bg-green-500/10 text-green-500',
     ATRASADO: 'border-red-500 bg-red-500/10 text-red-500',
     ADIANTADO: 'border-blue-400 bg-blue-400/10 text-blue-400',
+};
+
+const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = {
+    PENDING_APPROVAL: 'EM ANÁLISE',
+    APPROVED: 'APROVADO',
+    REJECTED: 'RECUSADO',
+};
+
+const PAYMENT_STATUS_STYLE: Record<PaymentStatus, string> = {
+    PENDING_APPROVAL: 'border-yellow-400 bg-yellow-400/10 text-yellow-400',
+    APPROVED: 'border-green-500 bg-green-500/10 text-green-500',
+    REJECTED: 'border-red-500 bg-red-500/10 text-red-500',
 };
 
 function formatCurrency(value: number): string {
@@ -42,6 +54,22 @@ function StatusBadge({ status }: { status: BillingStatus }) {
             <span className="w-1.5 h-1.5 bg-current" />
             {STATUS_LABEL[status]}
         </span>
+    );
+}
+
+function PaymentStatusBadge({ payment }: { payment: Payment }) {
+    return (
+        <div className="flex flex-col gap-1">
+            <span className={`inline-flex items-center gap-2 px-3 py-1 border text-xs tech-text tracking-wider w-fit ${PAYMENT_STATUS_STYLE[payment.status]}`}>
+                <span className="w-1.5 h-1.5 bg-current" />
+                {PAYMENT_STATUS_LABEL[payment.status]}
+            </span>
+            {payment.status === 'REJECTED' && payment.rejectedReason && (
+                <span className="text-xs text-red-400/80 body-text" title={payment.rejectedReason}>
+                    {payment.rejectedReason}
+                </span>
+            )}
+        </div>
     );
 }
 
@@ -64,11 +92,8 @@ export default function StudentDetailPage() {
     const [previewPaymentId, setPreviewPaymentId] = useState<string | null>(null);
     const [openingReceiptId, setOpeningReceiptId] = useState<string | null>(null);
 
-    // Derivado do cache: quando a query é refeita, a preview passa a usar a signed URL nova.
     const previewPayment = payments?.find((payment) => payment.id === previewPaymentId) ?? null;
 
-    // A signed URL do comprovante expira, então a lista é refeita antes de abrir a preview
-    // para garantir um link válido mesmo com a tela aberta há muito tempo.
     const handleOpenReceipt = async (payment: Payment) => {
         setOpeningReceiptId(payment.id);
         try {
@@ -194,16 +219,20 @@ export default function StudentDetailPage() {
                                 <Table.Row>
                                     <Table.Cell as="th">Data</Table.Cell>
                                     <Table.Cell as="th">Valor</Table.Cell>
+                                    <Table.Cell as="th">Status</Table.Cell>
                                     <Table.Cell as="th">Nota</Table.Cell>
                                     <Table.Cell as="th">Comprovante</Table.Cell>
                                     <Table.Cell as="th">Ações</Table.Cell>
                                 </Table.Row>
                             </Table.Header>
                             <tbody>
-                                {payments.map((payment) => (
+                                {payments.slice().reverse().map((payment) => (
                                     <Table.Row key={payment.id}>
                                         <Table.Cell>{formatDate(payment.paidAt)}</Table.Cell>
                                         <Table.Cell>{formatCurrency(payment.amount)}</Table.Cell>
+                                        <Table.Cell>
+                                            <PaymentStatusBadge payment={payment} />
+                                        </Table.Cell>
                                         <Table.Cell>
                                             <span className="text-white/70">{payment.note || '—'}</span>
                                         </Table.Cell>
