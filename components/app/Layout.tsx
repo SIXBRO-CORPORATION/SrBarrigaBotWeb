@@ -20,9 +20,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                         <div className="flex items-center gap-3">
                             <div className="w-8 h-8 bg-white flex items-center justify-center chamfer-sm">
                                 <div className="w-6 h-6 bg-[#0A0A0A] flex items-center justify-center chamfer-sm">
-                                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-                                        <path strokeLinecap="square" strokeLinejoin="miter" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                    </svg>
+                                    <img src="/logo.png" alt="logo_computaria" className="w-8 h-6"/>
                                 </div>
                             </div>
                             <h1 className="text-sm font-bold text-white">SR. BARRIGA BOT</h1>
