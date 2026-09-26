@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { DashboardLayout } from '@/components/app/Layout';
 import { Button } from '@/components/ui/Button';
 import { Table } from '@/components/ui/Table';
-import { Loading } from '@/components/ui/Loading';
+import { ComitteeSkeleton } from '@/components/app/ComitteeSkeleton';
 import { UserFormModal } from '@/components/app/UserFormModal';
 import { ConfirmDialog } from '@/components/app/ConfirmDialog';
 import { useUsers, useDeleteUser } from '@/hooks/useUser';
@@ -78,10 +78,7 @@ export default function ComitteePage() {
                 </div>
 
                 {isLoading ? (
-                    <div className="flex flex-col items-center gap-4 py-16">
-                        <Loading.Root size="lg" />
-                        <p className="text-white/70 body-text">Carregando membros...</p>
-                    </div>
+                    <ComitteeSkeleton />
                 ) : isError ? (
                     <div className="bg-[#0A0A0A] border-2 border-red-500/50 p-8 text-center space-y-2">
                         <p className="text-white body-text">
