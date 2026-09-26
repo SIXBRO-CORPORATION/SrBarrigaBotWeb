@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { DashboardLayout } from '@/components/app/Layout';
 import { Table } from '@/components/ui/Table';
 import { Loading } from '@/components/ui/Loading';
+import { PaymentsSkeleton } from '@/components/app/PaymentsSkeleton';
 import { ConfirmDialog } from '@/components/app/ConfirmDialog';
 import { RejectPaymentModal } from '@/components/app/RejectPaymentModal';
 import { ReceiptPreview } from '@/components/app/ReceiptPreview';
@@ -96,10 +97,7 @@ export default function PendingPaymentsPage() {
                 </div>
 
                 {isLoading ? (
-                    <div className="flex flex-col items-center gap-4 py-16">
-                        <Loading.Root size="lg" />
-                        <p className="text-white/70 body-text">Carregando pagamentos pendentes...</p>
-                    </div>
+                    <PaymentsSkeleton />
                 ) : isError ? (
                     <div className="bg-[#0A0A0A] border-2 border-red-500/50 p-8 text-center">
                         <p className="text-white body-text">
