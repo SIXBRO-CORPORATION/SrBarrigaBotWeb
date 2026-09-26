@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { usePendingPayments } from '@/hooks/usePayments';
-import {Loading} from "@/components/ui/Loading";
+import { SidebarUserSkeleton } from '@/components/app/SidebarSkeleton';
 
 interface SidebarProps {
     isOpen: boolean;
@@ -14,7 +14,7 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
     const pathname = usePathname();
-    const { user, logout } = useAuth();
+    const { user, isLoading: isUserLoading, logout } = useAuth();
     const { data: pendingPayments } = usePendingPayments();
     const pendingPaymentsCount = pendingPayments?.length ?? 0;
 
@@ -134,14 +134,18 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                 <path strokeLinecap="square" strokeLinejoin="miter" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                         </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm text-white body-text truncate">
-                                {user?.name || <Loading.Root size="md" variant="line"/>}
-                            </p>
-                            <p className="text-xs text-white/40 tech-text truncate">
-                                {user?.email || ''}
-                            </p>
-                        </div>
+                        {isUserLoading ? (
+                            <SidebarUserSkeleton />
+                        ) : (
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm text-white body-text truncate">
+                                    {user?.name}
+                                </p>
+                                <p className="text-xs text-white/40 tech-text truncate">
+                                    {user?.email || ''}
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
 
