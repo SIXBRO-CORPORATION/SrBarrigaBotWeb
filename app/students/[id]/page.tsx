@@ -92,11 +92,8 @@ export default function StudentDetailPage() {
     const [previewPaymentId, setPreviewPaymentId] = useState<string | null>(null);
     const [openingReceiptId, setOpeningReceiptId] = useState<string | null>(null);
 
-    // Derivado do cache: quando a query é refeita, a preview passa a usar a signed URL nova.
     const previewPayment = payments?.find((payment) => payment.id === previewPaymentId) ?? null;
 
-    // A signed URL do comprovante expira, então a lista é refeita antes de abrir a preview
-    // para garantir um link válido mesmo com a tela aberta há muito tempo.
     const handleOpenReceipt = async (payment: Payment) => {
         setOpeningReceiptId(payment.id);
         try {

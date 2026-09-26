@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Loading } from '@/components/ui/Loading';
+import { DashboardSkeleton } from '@/components/app/DashboardSkeleton';
 import { useDashboardSummary } from '@/hooks/useDashboard';
 
 function formatCurrency(value: number): string {
@@ -50,12 +50,7 @@ export function DashboardSummaryCards() {
     const { data: summary, isLoading, isError } = useDashboardSummary();
 
     if (isLoading) {
-        return (
-            <div className="flex flex-col items-center gap-4 py-16">
-                <Loading.Root size="lg" />
-                <p className="text-white/70 body-text">Carregando resumo...</p>
-            </div>
-        );
+        return <DashboardSkeleton />;
     }
 
     if (isError || !summary) {
