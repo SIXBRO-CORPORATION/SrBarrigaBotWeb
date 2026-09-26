@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { DashboardLayout } from '@/components/app/Layout';
 import { Button } from '@/components/ui/Button';
 import { Table } from '@/components/ui/Table';
-import { Loading } from '@/components/ui/Loading';
+import { StudentsSkeleton } from '@/components/app/StudentsSkeleton';
 import { StudentFormModal } from '@/components/app/StudentFormModal';
 import { ConfirmDialog } from '@/components/app/ConfirmDialog';
 import { useStudents, useRemoveStudent } from '@/hooks/useStudents';
@@ -94,10 +94,7 @@ export default function StudentsPage() {
                 </div>
 
                 {isLoading ? (
-                    <div className="flex flex-col items-center gap-4 py-16">
-                        <Loading.Root size="lg" />
-                        <p className="text-white/70 body-text">Carregando alunos...</p>
-                    </div>
+                    <StudentsSkeleton />
                 ) : isError ? (
                     <div className="bg-[#0A0A0A] border-2 border-red-500/50 p-8 text-center space-y-2">
                         <p className="text-white body-text">
