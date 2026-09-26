@@ -5,6 +5,11 @@ import { DashboardLayout } from '@/components/app/Layout';
 import { Button } from '@/components/ui/Button';
 import { Loading } from '@/components/ui/Loading';
 import { Modal } from '@/components/ui/Modal';
+import {
+    WhatsAppStatusBadgeSkeleton,
+    WhatsAppStatusBodySkeleton,
+    WhatsAppAutomationValueSkeleton,
+} from '@/components/app/WhatsAppSkeleton';
 import { useWhatsAppWebSocket } from '@/hooks/useWhatsAppWebSocket';
 import { useExecuteCharge } from '@/hooks/useWhatsapp';
 import { useToast } from '@/providers/ToastProvider';
@@ -122,14 +127,7 @@ export default function WhatsAppPage() {
                                 </div>
 
                                 {isLoadingInitialStatus ? (
-                                    <div className="px-4 py-2 border-2 border-white/30 bg-white/5">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 bg-white/40 animate-pulse-soft" />
-                                            <span className="text-xs tech-text tracking-wider text-white/60">
-                                                CARREGANDO...
-                                            </span>
-                                        </div>
-                                    </div>
+                                    <WhatsAppStatusBadgeSkeleton />
                                 ) : (
                                     <div className={`px-4 py-2 border-2 ${
                                         isConnected
@@ -153,21 +151,7 @@ export default function WhatsAppPage() {
                             <div className="h-px bg-white/10 mb-6" />
 
                             {isLoadingInitialStatus ? (
-                                <div className="space-y-4">
-                                    <div className="flex items-start gap-3">
-                                        <div className="w-5 h-5 flex-shrink-0 mt-0.5">
-                                            <Loading.Root size="sm" variant="spinner" />
-                                        </div>
-                                        <div>
-                                            <p className="text-white body-text mb-1">
-                                                Verificando status da conexão...
-                                            </p>
-                                            <p className="text-xs text-white/50 body-text">
-                                                Aguarde enquanto sincronizamos com o servidor
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <WhatsAppStatusBodySkeleton />
                             ) : isConnected ? (
                                 <div className="space-y-4">
                                     <div className="flex items-start gap-3">
@@ -320,12 +304,18 @@ export default function WhatsAppPage() {
                                 AUTOMAÇÃO
                             </h3>
                         </div>
-                        <p className="text-2xl text-white body-text">
-                            {isLoadingInitialStatus ? <Loading.Root size="lg" variant="minimal" /> : (isConnected ? 'Ativa' : 'Inativa')}
-                        </p>
-                        <p className="text-xs text-white/40 mt-1 body-text">
-                            {isLoadingInitialStatus ? 'Verificando...' : (isConnected ? 'Sistema operacional' : 'Aguardando conexão')}
-                        </p>
+                        {isLoadingInitialStatus ? (
+                            <WhatsAppAutomationValueSkeleton />
+                        ) : (
+                            <>
+                                <p className="text-2xl text-white body-text">
+                                    {isConnected ? 'Ativa' : 'Inativa'}
+                                </p>
+                                <p className="text-xs text-white/40 mt-1 body-text">
+                                    {isConnected ? 'Sistema operacional' : 'Aguardando conexão'}
+                                </p>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
