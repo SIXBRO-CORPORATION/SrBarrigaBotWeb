@@ -7,6 +7,11 @@ import { DashboardLayout } from '@/components/app/Layout';
 import { Button } from '@/components/ui/Button';
 import { Table } from '@/components/ui/Table';
 import { Loading } from '@/components/ui/Loading';
+import {
+    StudentHeaderSkeleton,
+    MonthTimelineSkeleton,
+    PaymentsHistorySkeleton,
+} from '@/components/app/StudentDetailSkeleton';
 import { RegisterPaymentModal } from '@/components/app/RegisterPaymentModal';
 import { MonthTimelineGrid } from '@/components/app/MonthTimelineGrid';
 import { ConfirmDialog } from '@/components/app/ConfirmDialog';
@@ -135,10 +140,7 @@ export default function StudentDetailPage() {
                     </Link>
 
                     {isLoadingDetail ? (
-                        <div className="flex items-center gap-4 py-4">
-                            <Loading.Root size="lg" />
-                            <p className="text-white/70 body-text">Carregando dados do aluno...</p>
-                        </div>
+                        <StudentHeaderSkeleton />
                     ) : isDetailError || !detail ? (
                         <div className="bg-[#0A0A0A] border-2 border-red-500/50 p-8 text-center">
                             <p className="text-white body-text">
@@ -179,7 +181,14 @@ export default function StudentDetailPage() {
                     )}
                 </div>
 
-                {!isLoadingDetail && !isDetailError && detail && (
+                {isLoadingDetail ? (
+                    <div className="space-y-4">
+                        <h2 className="text-lg tech-text text-white/70 tracking-wider">
+                            MÊS A MÊS
+                        </h2>
+                        <MonthTimelineSkeleton />
+                    </div>
+                ) : !isDetailError && detail && (
                     <div className="space-y-4">
                         <h2 className="text-lg tech-text text-white/70 tracking-wider">
                             MÊS A MÊS
@@ -194,10 +203,7 @@ export default function StudentDetailPage() {
                     </h2>
 
                     {isLoadingPayments ? (
-                        <div className="flex flex-col items-center gap-4 py-16">
-                            <Loading.Root size="lg" />
-                            <p className="text-white/70 body-text">Carregando pagamentos...</p>
-                        </div>
+                        <PaymentsHistorySkeleton />
                     ) : isPaymentsError ? (
                         <div className="bg-[#0A0A0A] border-2 border-red-500/50 p-8 text-center">
                             <p className="text-white body-text">
