@@ -7,6 +7,7 @@ import { DashboardLayout } from '@/components/app/Layout';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Loading } from '@/components/ui/Loading';
+import { SettingsSkeleton } from '@/components/app/SettingsSkeleton';
 import { useToast } from '@/providers/ToastProvider';
 import { useSystemConfig, useUpdateSystemConfig } from '@/hooks/useConfig';
 import { usePixInfo, PIX_INFO_QUERY_KEY } from '@/hooks/usePublicPayment';
@@ -388,10 +389,7 @@ export default function SettingsPage() {
                 </div>
 
                 {isLoading ? (
-                    <div className="flex items-center justify-center gap-4 py-16">
-                        <Loading.Root size="lg" />
-                        <p className="text-white/70 body-text">Carregando configurações...</p>
-                    </div>
+                    <SettingsSkeleton />
                 ) : isError ? (
                     <div className="bg-[#0A0A0A] border-2 border-red-500/50 p-8 text-center">
                         <p className="text-white body-text">
