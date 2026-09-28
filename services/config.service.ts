@@ -8,7 +8,7 @@ export const configService = {
     },
 
     update: async (data: UpdateConfigRequest): Promise<SystemConfig> => {
-        const response = await httpClient.patch<SystemConfig>('/config', data);
+        const response = await httpClient.patch<SystemConfig>('/config', data, { skipToast: true });
         return response.data!;
     },
 };
