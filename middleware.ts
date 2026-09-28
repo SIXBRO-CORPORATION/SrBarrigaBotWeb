@@ -24,9 +24,13 @@ function isTokenExpired(token: string): boolean {
 export default function middleware(request: NextRequest) {
     const path = request.nextUrl.pathname;
     const isPublicRoute = publicRoutes.includes(path);
-    const accessToken = request.cookies.get("access_token")?.value;
 
-    const isAuthenticated = accessToken && !isTokenExpired(accessToken);
+    const hasValidToken = (name: string) => {
+        const token = request.cookies.get(name)?.value;
+        return !!token && !isTokenExpired(token);
+    };
+    
+    const isAuthenticated = hasValidToken("access_token") || hasValidToken("refresh_token");
 
     if (!isAuthenticated && !isPublicRoute) {
         const redirectUrl = request.nextUrl.clone();

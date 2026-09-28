@@ -42,9 +42,7 @@ export const useWhatsAppWebSocket = () => {
         }
 
         const socket = io(`${API_BASE_URL.replace('/api', '')}/whatsapp`, {
-            auth: {
-                token,
-            },
+            auth: (cb) => cb({ token: tokenManager.getAccessToken() }),
             extraHeaders: {
                 Authorization: `Bearer ${token}`,
             },
