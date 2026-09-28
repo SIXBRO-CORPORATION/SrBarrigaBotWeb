@@ -24,6 +24,7 @@ export const SYSTEM_CONFIG_KEYS = {
 export const CHARGE_VARIABLES = [
     { name: 'nome', description: 'Nome do aluno' },
     { name: 'mes', description: 'Mês atual por extenso' },
-    { name: 'valor_atraso', description: 'Saldo em atraso do aluno' },
+    { name: 'valor_atraso', description: 'Valor em atraso do aluno (sempre positivo)' },
+    { name: 'saldo', description: 'Saldo do aluno: negativo se devendo, positivo se adiantado' },
     { name: 'mensalidade', description: 'Valor da mensalidade' },
 ] as const;

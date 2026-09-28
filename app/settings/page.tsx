@@ -506,6 +506,7 @@ function ChargeBlock({ configs }: ChargeBlockProps) {
         nome: 'Maria',
         mes: currentMonth.charAt(0).toUpperCase() + currentMonth.slice(1),
         valor_atraso: '50,00',
+        saldo: '-50,00',
         mensalidade: (Number.isNaN(monthlyFee) ? 0 : monthlyFee).toLocaleString('pt-BR', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
