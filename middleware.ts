@@ -29,7 +29,7 @@ export default function middleware(request: NextRequest) {
         const token = request.cookies.get(name)?.value;
         return !!token && !isTokenExpired(token);
     };
-    
+
     const isAuthenticated = hasValidToken("access_token") || hasValidToken("refresh_token");
 
     if (!isAuthenticated && !isPublicRoute) {

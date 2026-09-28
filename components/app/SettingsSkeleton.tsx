@@ -47,8 +47,11 @@ export function SettingsSkeleton() {
             role="status"
             aria-label="Carregando configurações"
         >
-            <ConfigBlockSkeleton fields={2} />
-            <ConfigBlockSkeleton fields={3} />
+            <div className="space-y-6">
+                <ConfigBlockSkeleton fields={2} />
+                <ConfigBlockSkeleton fields={3} />
+            </div>
+            <ConfigBlockSkeleton fields={4} />
         </div>
     );
 }

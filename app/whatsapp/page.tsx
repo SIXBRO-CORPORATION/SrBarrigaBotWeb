@@ -12,9 +12,32 @@ import {
 } from '@/components/app/WhatsAppSkeleton';
 import { useWhatsAppWebSocket } from '@/hooks/useWhatsAppWebSocket';
 import { useExecuteCharge } from '@/hooks/useWhatsapp';
+import { useSystemConfig } from '@/hooks/useConfig';
 import { useToast } from '@/providers/ToastProvider';
+import { SYSTEM_CONFIG_KEYS } from '@/types/config';
 import type { ChargeStatus } from '@/types/whatsapp';
 import QRCode from 'react-qr-code';
+
+const FORTALEZA_OFFSET_MS = 3 * 60 * 60 * 1000;
+
+function nextChargeRun(day: string, time: string): string | null {
+    const match = /^(\d{2}):(\d{2})$/.exec(time);
+    const dayOfMonth = Number(day);
+    if (!match || !Number.isInteger(dayOfMonth) || dayOfMonth < 1) return null;
+
+    const hour = Number(match[1]);
+    const minute = Number(match[2]);
+
+    const now = new Date(Date.now() - FORTALEZA_OFFSET_MS);
+    let next = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), dayOfMonth, hour, minute);
+    if (next <= now.getTime()) {
+        next = Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, dayOfMonth, hour, minute);
+    }
+
+    const date = new Date(next);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${pad(date.getUTCDate())}/${pad(date.getUTCMonth() + 1)} às ${pad(hour)}:${pad(minute)}`;
+}
 
 export default function WhatsAppPage() {
     const {
@@ -29,6 +52,10 @@ export default function WhatsAppPage() {
     } = useWhatsAppWebSocket();
 
     const executeChargeMutation = useExecuteCharge();
+    const { data: configs, isLoading: isLoadingConfigs } = useSystemConfig();
+    const chargeDay = configs?.find((c) => c.key === SYSTEM_CONFIG_KEYS.CHARGE_DAY)?.value ?? '';
+    const chargeTime = configs?.find((c) => c.key === SYSTEM_CONFIG_KEYS.CHARGE_TIME)?.value ?? '';
+    const nextRun = chargeDay && chargeTime ? nextChargeRun(chargeDay, chargeTime) : null;
     const { success, error: showError, info, warning } = useToast();
     const previousChargeStatus = React.useRef<ChargeStatus | null>(null);
     const [showQRModal, setShowQRModal] = useState(false);
@@ -266,12 +293,20 @@ export default function WhatsAppPage() {
                                 PRÓXIMA EXECUÇÃO
                             </h3>
                         </div>
-                        <p className="text-2xl text-white body-text">
-                            01/06 às 08:40
-                        </p>
-                        <p className="text-xs text-white/40 mt-1 body-text">
-                            Dia 01 de cada mês
-                        </p>
+                        {isLoadingConfigs ? (
+                            <WhatsAppAutomationValueSkeleton />
+                        ) : (
+                            <>
+                                <p className="text-2xl text-white body-text">
+                                    {nextRun ?? 'Não configurada'}
+                                </p>
+                                <p className="text-xs text-white/40 mt-1 body-text">
+                                    {nextRun
+                                        ? `Dia ${chargeDay.padStart(2, '0')} de cada mês`
+                                        : 'Defina o dia e o horário em Configurações'}
+                                </p>
+                            </>
+                        )}
                     </div>
 
                     <div className="bg-[#0A0A0A] border-2 border-white/30 p-6">

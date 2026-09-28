@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import QRCode from 'react-qr-code';
 import { DashboardLayout } from '@/components/app/Layout';
@@ -11,8 +11,15 @@ import { SettingsSkeleton } from '@/components/app/SettingsSkeleton';
 import { useToast } from '@/providers/ToastProvider';
 import { useSystemConfig, useUpdateSystemConfig } from '@/hooks/useConfig';
 import { usePixInfo, PIX_INFO_QUERY_KEY } from '@/hooks/usePublicPayment';
-import { SYSTEM_CONFIG_KEYS } from '@/types/config';
-import type { SystemConfig } from '@/types/config';
+import { CHARGE_VARIABLES, SYSTEM_CONFIG_KEYS } from '@/types/config';
+import type { SystemConfig, UpdateConfigRequest } from '@/types/config';
+
+const CHARGE_KEYS = [
+    SYSTEM_CONFIG_KEYS.CHARGE_DAY,
+    SYSTEM_CONFIG_KEYS.CHARGE_TIME,
+    SYSTEM_CONFIG_KEYS.CHARGE_MESSAGE_OK,
+    SYSTEM_CONFIG_KEYS.CHARGE_MESSAGE_PENDING,
+];
 
 function findValue(configs: SystemConfig[] | undefined, key: string): string {
     return configs?.find((c) => c.key === key)?.value ?? '';
@@ -100,6 +107,12 @@ const CurrencyIcon = () => (
 const PixIcon = () => (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
         <path strokeLinecap="square" strokeLinejoin="miter" d="M13 10V3L4 14h7v7l9-11h-7z" />
+    </svg>
+);
+
+const MessageIcon = () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+        <path strokeLinecap="square" strokeLinejoin="miter" d="M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4-.8L3 20l1.4-3.7C3.5 15.1 3 13.6 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
     </svg>
 );
 
@@ -373,6 +386,235 @@ function PixBlock({ configs }: PixBlockProps) {
     );
 }
 
+const VARIABLE_PATTERN = /\{\{\s*(\w+)\s*\}\}/g;
+
+function renderPreview(template: string, vars: Record<string, string>): string {
+    return template.replace(VARIABLE_PATTERN, (match, name: string) => vars[name] ?? match);
+}
+
+function validateTemplate(template: string): string | undefined {
+    if (!template.trim()) return 'Informe o texto da mensagem';
+
+    const known = CHARGE_VARIABLES.map((v) => v.name as string);
+    const unknown = [...template.matchAll(VARIABLE_PATTERN)].map((m) => m[1]).filter((name) => !known.includes(name));
+
+    return unknown.length > 0
+        ? `Variável desconhecida: ${unknown.map((name) => `{{${name}}}`).join(', ')}`
+        : undefined;
+}
+
+interface MessageFieldProps {
+    label: string;
+    value: string;
+    onChange: (value: string) => void;
+    error?: string;
+    disabled: boolean;
+    previewVars: Record<string, string>;
+}
+
+function MessageField({ label, value, onChange, error, disabled, previewVars }: MessageFieldProps) {
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    const insertVariable = (name: string) => {
+        const el = textareaRef.current;
+        if (!el) return;
+
+        const token = `{{${name}}}`;
+        const start = el.selectionStart;
+        const end = el.selectionEnd;
+        const cursor = start + token.length;
+
+        onChange(value.slice(0, start) + token + value.slice(end));
+        requestAnimationFrame(() => {
+            el.focus();
+            el.setSelectionRange(cursor, cursor);
+        });
+    };
+
+    return (
+        <div className="space-y-3">
+            <label className="block text-xs tech-text text-white/70 tracking-wider">{label}</label>
+
+            <div className="flex flex-wrap gap-2">
+                {CHARGE_VARIABLES.map((variable) => (
+                    <button
+                        key={variable.name}
+                        type="button"
+                        title={variable.description}
+                        disabled={disabled}
+                        onClick={() => insertVariable(variable.name)}
+                        className="px-2 py-1 text-xs tech-text border border-white/30 text-white/70 hover:bg-white hover:text-black hover:border-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {`{{${variable.name}}}`}
+                    </button>
+                ))}
+            </div>
+
+            <textarea
+                ref={textareaRef}
+                rows={9}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                disabled={disabled}
+                className={`w-full px-4 py-3 bg-transparent border-2 ${error ? 'border-red-500' : 'border-white/30'} text-white body-text placeholder:text-white/40 focus:outline-none focus:border-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed resize-y`}
+            />
+            {error && <p className="text-xs text-red-500 body-text">{error}</p>}
+
+            <div className="border border-white/10 bg-white/5 p-4 space-y-2">
+                <p className="text-xs tech-text text-white/40 tracking-wider">PRÉVIA (DADOS DE EXEMPLO)</p>
+                <p className="text-sm text-white/70 body-text whitespace-pre-wrap break-words">
+                    {renderPreview(value, previewVars)}
+                </p>
+            </div>
+        </div>
+    );
+}
+
+interface ChargeBlockProps {
+    configs?: SystemConfig[];
+}
+
+function ChargeBlock({ configs }: ChargeBlockProps) {
+    const { success, error: showError } = useToast();
+    const updateMutation = useUpdateSystemConfig();
+
+    const saved = {
+        day: findValue(configs, SYSTEM_CONFIG_KEYS.CHARGE_DAY),
+        time: findValue(configs, SYSTEM_CONFIG_KEYS.CHARGE_TIME),
+        messageOk: findValue(configs, SYSTEM_CONFIG_KEYS.CHARGE_MESSAGE_OK),
+        messagePending: findValue(configs, SYSTEM_CONFIG_KEYS.CHARGE_MESSAGE_PENDING),
+    };
+
+    const [day, setDay] = useState(saved.day);
+    const [time, setTime] = useState(saved.time);
+    const [messageOk, setMessageOk] = useState(saved.messageOk);
+    const [messagePending, setMessagePending] = useState(saved.messagePending);
+    const [errors, setErrors] = useState<{ day?: string; time?: string; messageOk?: string; messagePending?: string }>({});
+
+    const dirty = {
+        day: day.trim() !== saved.day,
+        time: time !== saved.time,
+        messageOk: messageOk.trim() !== saved.messageOk,
+        messagePending: messagePending.trim() !== saved.messagePending,
+    };
+    const isDirty = Object.values(dirty).some(Boolean);
+    const isSaving = updateMutation.isPending;
+
+    const monthlyFee = Number(findValue(configs, SYSTEM_CONFIG_KEYS.MONTHLY_FEE));
+    const currentMonth = new Date().toLocaleDateString('pt-BR', { month: 'long' });
+    const previewVars = {
+        nome: 'Maria',
+        mes: currentMonth.charAt(0).toUpperCase() + currentMonth.slice(1),
+        valor_atraso: '50,00',
+        mensalidade: (Number.isNaN(monthlyFee) ? 0 : monthlyFee).toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }),
+    };
+
+    const handleSave = async () => {
+        const newErrors: typeof errors = {};
+
+        const parsedDay = Number(day);
+        if (!day.trim() || !Number.isInteger(parsedDay) || parsedDay < 1 || parsedDay > 28) {
+            newErrors.day = 'Informe um dia de 1 a 28';
+        }
+        if (!time) newErrors.time = 'Informe o horário';
+        newErrors.messageOk = validateTemplate(messageOk);
+        newErrors.messagePending = validateTemplate(messagePending);
+
+        setErrors(newErrors);
+        if (Object.values(newErrors).some(Boolean)) return;
+
+        const updates: UpdateConfigRequest[] = [];
+        if (dirty.day) updates.push({ key: SYSTEM_CONFIG_KEYS.CHARGE_DAY, value: String(parsedDay) });
+        if (dirty.time) updates.push({ key: SYSTEM_CONFIG_KEYS.CHARGE_TIME, value: time });
+        if (dirty.messageOk) updates.push({ key: SYSTEM_CONFIG_KEYS.CHARGE_MESSAGE_OK, value: messageOk.trim() });
+        if (dirty.messagePending) {
+            updates.push({ key: SYSTEM_CONFIG_KEYS.CHARGE_MESSAGE_PENDING, value: messagePending.trim() });
+        }
+
+        try {
+            for (const update of updates) {
+                await updateMutation.mutateAsync(update);
+            }
+            success('Configurações de cobrança atualizadas com sucesso');
+        } catch (error) {
+            showError(error instanceof Error ? error.message : 'Erro ao atualizar as configurações de cobrança');
+        }
+    };
+
+    const modifiedAtLabel = formatModifiedAt(latestModifiedAt(configs, CHARGE_KEYS));
+
+    return (
+        <ConfigBlockShell
+            title="MENSAGEM DE COBRANÇA"
+            description="Quando o lembrete automático é enviado por WhatsApp e o texto que cada aluno recebe."
+            icon={<MessageIcon />}
+        >
+            <Input.Group>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <Input.Root
+                        label="DIA DO MÊS (1 A 28)"
+                        type="number"
+                        min="1"
+                        max="28"
+                        step="1"
+                        value={day}
+                        onChange={(e) => {
+                            setDay(e.target.value);
+                            setErrors((prev) => ({ ...prev, day: undefined }));
+                        }}
+                        error={errors.day}
+                        disabled={isSaving}
+                    />
+
+                    <Input.Root
+                        label="HORÁRIO"
+                        type="time"
+                        value={time}
+                        onChange={(e) => {
+                            setTime(e.target.value);
+                            setErrors((prev) => ({ ...prev, time: undefined }));
+                        }}
+                        error={errors.time}
+                        disabled={isSaving}
+                    />
+                </div>
+                <p className="text-xs text-white/30 body-text -mt-3">
+                    Horário de Fortaleza (UTC-3). Alterações valem já para o próximo envio.
+                </p>
+
+                <MessageField
+                    label="MENSAGEM PARA QUEM ESTÁ EM DIA"
+                    value={messageOk}
+                    onChange={(value) => {
+                        setMessageOk(value);
+                        setErrors((prev) => ({ ...prev, messageOk: undefined }));
+                    }}
+                    error={errors.messageOk}
+                    disabled={isSaving}
+                    previewVars={previewVars}
+                />
+
+                <MessageField
+                    label="MENSAGEM PARA QUEM ESTÁ PENDENTE"
+                    value={messagePending}
+                    onChange={(value) => {
+                        setMessagePending(value);
+                        setErrors((prev) => ({ ...prev, messagePending: undefined }));
+                    }}
+                    error={errors.messagePending}
+                    disabled={isSaving}
+                    previewVars={previewVars}
+                />
+            </Input.Group>
+
+            <BlockFooter isDirty={isDirty} isSaving={isSaving} onSave={handleSave} modifiedAtLabel={modifiedAtLabel} />
+        </ConfigBlockShell>
+    );
+}
+
 export default function SettingsPage() {
     const { data: configs, isLoading, isError } = useSystemConfig();
 
@@ -398,12 +640,18 @@ export default function SettingsPage() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-                        <MonthlyFeeBlock
-                            key={`monthly-fee-${latestModifiedAt(configs, [SYSTEM_CONFIG_KEYS.MONTHLY_FEE, SYSTEM_CONFIG_KEYS.BILLING_START_DATE]) ?? 'new'}`}
-                            configs={configs}
-                        />
-                        <PixBlock
-                            key={`pix-${latestModifiedAt(configs, [SYSTEM_CONFIG_KEYS.PIX_KEY, SYSTEM_CONFIG_KEYS.PIX_RECEIVER_NAME, SYSTEM_CONFIG_KEYS.PIX_RECEIVER_CITY]) ?? 'new'}`}
+                        <div className="space-y-6">
+                            <MonthlyFeeBlock
+                                key={`monthly-fee-${latestModifiedAt(configs, [SYSTEM_CONFIG_KEYS.MONTHLY_FEE, SYSTEM_CONFIG_KEYS.BILLING_START_DATE]) ?? 'new'}`}
+                                configs={configs}
+                            />
+                            <PixBlock
+                                key={`pix-${latestModifiedAt(configs, [SYSTEM_CONFIG_KEYS.PIX_KEY, SYSTEM_CONFIG_KEYS.PIX_RECEIVER_NAME, SYSTEM_CONFIG_KEYS.PIX_RECEIVER_CITY]) ?? 'new'}`}
+                                configs={configs}
+                            />
+                        </div>
+                        <ChargeBlock
+                            key={`charge-${latestModifiedAt(configs, CHARGE_KEYS) ?? 'new'}`}
                             configs={configs}
                         />
                     </div>
