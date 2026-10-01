@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { FileInput } from '@/components/ui/FileInput';
 import { Loading } from '@/components/ui/Loading';
+import { PaymentStatusOverlay, type PaymentOverlayPhase } from '@/components/app/PaymentStatusOverlay';
 import { useToast } from '@/providers/ToastProvider';
 import { usePixInfo, useRegisterPublicPayment } from '@/hooks/usePublicPayment';
 import type { PublicPaymentResult } from '@/types/public-payment';
@@ -39,6 +40,21 @@ export default function PagamentoPage() {
     const [result, setResult] = useState<PublicPaymentResult | null>(null);
 
     const isSubmitting = registerMutation.isPending;
+
+    const overlayPhase: PaymentOverlayPhase | null = isSubmitting
+        ? 'processing'
+        : registerMutation.isError
+          ? 'error'
+          : result
+            ? 'success'
+            : null;
+
+    const overlayDescription =
+        overlayPhase === 'success' && result
+            ? `Recebemos o registro de ${formatCurrency(result.amount)}. Assim que conferirmos o comprovante, ele será aprovado.`
+            : overlayPhase === 'error'
+              ? registerMutation.error?.message
+              : undefined;
 
     const handleCopyPix = async () => {
         const payload = pixQuery.data?.payload;
@@ -111,7 +127,6 @@ export default function PagamentoPage() {
             if (message.toLowerCase().includes('matrícula') || message.toLowerCase().includes('matricula')) {
                 setErrors((prev) => ({ ...prev, matricula: message }));
             }
-            console.log(message || 'Erro ao registrar payment');
         }
     };
 
@@ -203,92 +218,65 @@ export default function PagamentoPage() {
                     </div>
                 </div>
 
-                {/* Card Formulário / Sucesso */}
+                {/* Card Formulário */}
                 <div className="relative bg-[#0A0A0A] border-2 border-white chamfer overflow-hidden">
                     <div className="absolute inset-3 border border-white/20 chamfer-sm pointer-events-none" />
                     <div className="relative p-6">
-                        {result ? (
-                            <div className="flex flex-col items-center text-center gap-4 py-4">
-                                <div className="w-14 h-14 bg-white flex items-center justify-center chamfer-sm">
-                                    <svg className="w-7 h-7 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-                                        <path strokeLinecap="square" strokeLinejoin="miter" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                </div>
-                                <h2 className="text-lg text-white">PAGAMENTO ENVIADO</h2>
-                                <p className="text-sm text-white/60 body-text">
-                                    Recebemos o registro de {formatCurrency(result.amount)}. Assim que
-                                    conferirmos o comprovante, ele será aprovado.
-                                </p>
-                                <Button.Root
-                                    type="button"
-                                    variant="ghost"
-                                    size="md"
-                                    onClick={resetForm}
-                                    className="mt-2"
-                                >
-                                    <Button.Text>REGISTRAR OUTRO PAGAMENTO</Button.Text>
-                                </Button.Root>
-                            </div>
-                        ) : (
-                            <>
-                                <h2 className="text-sm tech-text text-white/70 tracking-wider mb-4">
-                                    2. INFORME OS DADOS DO PAGAMENTO
-                                </h2>
-                                <form onSubmit={handleSubmit}>
-                                    <Input.Group>
-                                        <Input.Root
-                                            label="MATRÍCULA"
-                                            placeholder="Digite sua matrícula"
-                                            value={formData.matricula}
-                                            onChange={handleChange('matricula')}
-                                            error={errors.matricula}
-                                            disabled={isSubmitting}
-                                        />
+                        <h2 className="text-sm tech-text text-white/70 tracking-wider mb-4">
+                            2. INFORME OS DADOS DO PAGAMENTO
+                        </h2>
+                        <form onSubmit={handleSubmit}>
+                            <Input.Group>
+                                <Input.Root
+                                    label="MATRÍCULA"
+                                    placeholder="Digite sua matrícula"
+                                    value={formData.matricula}
+                                    onChange={handleChange('matricula')}
+                                    error={errors.matricula}
+                                    disabled={isSubmitting}
+                                />
 
-                                        <Input.Root
-                                            label="VALOR PAGO (R$)"
-                                            type="number"
-                                            step="0.01"
-                                            min="0"
-                                            placeholder="0,00"
-                                            value={formData.amount}
-                                            onChange={handleChange('amount')}
-                                            error={errors.amount}
-                                            disabled={isSubmitting}
-                                        />
+                                <Input.Root
+                                    label="VALOR PAGO (R$)"
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    placeholder="0,00"
+                                    value={formData.amount}
+                                    onChange={handleChange('amount')}
+                                    error={errors.amount}
+                                    disabled={isSubmitting}
+                                />
 
-                                        <Input.Root
-                                            label="OBSERVAÇÃO (OPCIONAL)"
-                                            placeholder="Ex.: referente à mensalidade de junho"
-                                            value={formData.note}
-                                            onChange={handleChange('note')}
-                                            disabled={isSubmitting}
-                                        />
+                                <Input.Root
+                                    label="OBSERVAÇÃO (OPCIONAL)"
+                                    placeholder="Ex.: referente à mensalidade de junho"
+                                    value={formData.note}
+                                    onChange={handleChange('note')}
+                                    disabled={isSubmitting}
+                                />
 
-                                        <FileInput.Root
-                                            label="COMPROVANTE DO PIX"
-                                            value={comprovante}
-                                            onChange={handleComprovanteChange}
-                                            error={errors.comprovante}
-                                            disabled={isSubmitting}
-                                            captureEnvironment
-                                            placeholder="Clique ou arraste o comprovante (obrigatório)"
-                                        />
-                                    </Input.Group>
+                                <FileInput.Root
+                                    label="COMPROVANTE DO PIX"
+                                    value={comprovante}
+                                    onChange={handleComprovanteChange}
+                                    error={errors.comprovante}
+                                    disabled={isSubmitting}
+                                    placeholder="Clique ou arraste o comprovante (obrigatório)"
+                                />
+                            </Input.Group>
 
-                                    <Button.Root
-                                        type="submit"
-                                        variant="primary"
-                                        size="lg"
-                                        className="w-full mt-8"
-                                        loading={isSubmitting}
-                                        disabled={isSubmitting}
-                                    >
-                                        <Button.Text>{isSubmitting ? 'ENVIANDO...' : 'ENVIAR PAGAMENTO'}</Button.Text>
-                                    </Button.Root>
-                                </form>
-                            </>
-                        )}
+                            <Button.Root
+                                type="submit"
+                                variant="primary"
+                                size="lg"
+                                className="w-full mt-8"
+                                loading={isSubmitting}
+                                disabled={isSubmitting}
+                            >
+                                <Button.Text>{isSubmitting ? 'ENVIANDO...' : 'ENVIAR PAGAMENTO'}</Button.Text>
+                            </Button.Root>
+                        </form>
                     </div>
                 </div>
 
@@ -296,6 +284,14 @@ export default function PagamentoPage() {
                     &gt;_compilando vitórias
                 </p>
             </div>
+
+            {overlayPhase && (
+                <PaymentStatusOverlay
+                    phase={overlayPhase}
+                    description={overlayDescription}
+                    onAction={overlayPhase === 'success' ? resetForm : registerMutation.reset}
+                />
+            )}
         </div>
     );
 }
