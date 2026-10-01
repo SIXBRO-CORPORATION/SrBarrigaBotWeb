@@ -3,11 +3,46 @@ import React, { forwardRef } from 'react';
 interface InputRootProps extends React.InputHTMLAttributes<HTMLInputElement> {
     error?: string;
     label?: string;
+    appearance?: 'default' | 'apple';
+    endAdornment?: React.ReactNode;
 }
 
 const InputRoot = forwardRef<HTMLInputElement, InputRootProps>(
-    ({ error, label, className = '', id, ...props }, ref) => {
+    ({ error, label, className = '', id, appearance = 'default', endAdornment, ...props }, ref) => {
         const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
+
+        if (appearance === 'apple') {
+            const errorId = `${inputId}-error`;
+
+            return (
+                <div className="apple-field">
+                    {label && (
+                        <label htmlFor={inputId} className="apple-field__label">
+                            {label}
+                        </label>
+                    )}
+                    <div className="apple-field__control">
+                        <input
+                            ref={ref}
+                            id={inputId}
+                            className={`apple-field__input ${endAdornment ? 'apple-field__input--has-end' : ''} ${className}`}
+                            aria-invalid={error ? true : undefined}
+                            aria-describedby={error ? errorId : undefined}
+                            {...props}
+                        />
+                        {endAdornment && <div className="apple-field__end">{endAdornment}</div>}
+                    </div>
+                    {error && (
+                        <p id={errorId} role="alert" className="apple-field__error">
+                            <svg className="apple-field__error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} aria-hidden="true">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {error}
+                        </p>
+                    )}
+                </div>
+            );
+        }
 
         return (
             <div className="w-full">

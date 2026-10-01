@@ -378,3 +378,475 @@ button,
         color: black;
     }
 }
+
+/* =====================================================================
+   Apple design — tela de login
+   Tudo prefixado com "apple-" para não afetar o restante do sistema.
+   ===================================================================== */
+
+:root {
+    --apple-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, "Segoe UI", Roboto, sans-serif;
+    --apple-label: #FFFFFF;
+    --apple-label-secondary: rgba(235, 235, 245, 0.62);
+    --apple-label-tertiary: rgba(235, 235, 245, 0.45);
+    --apple-fill: rgba(255, 255, 255, 0.07);
+    --apple-fill-hover: rgba(255, 255, 255, 0.10);
+    --apple-stroke: rgba(255, 255, 255, 0.12);
+    --apple-accent: #00D9FF;
+    --apple-accent-ring: rgba(0, 217, 255, 0.28);
+    --apple-danger: #FF453A;
+    --apple-danger-text: #FF6961;
+
+    /* Mola criticamente amortecida (damping 1.0, response ≈ 0.4s). Sem overshoot:
+       nada aqui carrega momentum de gesto. Fallback: curva suave equivalente. */
+    --apple-duration: 0.5s;
+    --apple-spring: cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+@supports (transition-timing-function: linear(0, 1)) {
+    :root {
+        --apple-spring: linear(0, 0.05, 0.161, 0.29, 0.418, 0.533, 0.631, 0.712, 0.778, 0.83, 0.871, 0.903, 0.927, 0.946, 0.96, 0.97, 0.978, 0.984, 0.988, 0.991, 0.994, 0.995, 1);
+    }
+}
+
+/* ---------- Página ---------- */
+.apple-login {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 1rem;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    color-scheme: dark;
+    font-family: var(--apple-font);
+    font-weight: 400;
+    color: var(--apple-label);
+    background:
+        radial-gradient(60rem 36rem at 50% -12%, rgba(0, 217, 255, 0.14), transparent 62%),
+        radial-gradient(44rem 30rem at 100% 112%, rgba(255, 255, 255, 0.06), transparent 60%),
+        #0A0A0A;
+}
+
+/* Luz estática atrás do vidro: dá o que desfocar, sem movimento. */
+.apple-login::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: 50%;
+    left: 50%;
+    width: 22rem;
+    height: 22rem;
+    border-radius: 50%;
+    background: rgba(0, 217, 255, 0.22);
+    filter: blur(90px);
+    transform: translate(-95%, -85%);
+    pointer-events: none;
+}
+
+/* ---------- Cartão: material grosso e escuro (superfície grande) ---------- */
+.apple-card {
+    width: 100%;
+    max-width: 26rem;
+    padding: 2.5rem 2rem 1.75rem;
+    border-radius: 1.75rem;
+    background: rgba(28, 28, 30, 0.55);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-top-color: rgba(255, 255, 255, 0.22); /* borda superior = luz batendo no material */
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 8px 24px rgba(0, 0, 0, 0.35),
+        0 32px 80px -16px rgba(0, 0, 0, 0.75);
+    animation: apple-materialize var(--apple-duration) var(--apple-spring) both;
+}
+
+/* O vidro "chega": blur e escala animam juntos, não é só um fade. */
+@keyframes apple-materialize {
+    from {
+        opacity: 0;
+        transform: translateY(0.5rem) scale(0.97);
+        -webkit-backdrop-filter: blur(0px) saturate(100%);
+        backdrop-filter: blur(0px) saturate(100%);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+        -webkit-backdrop-filter: blur(40px) saturate(180%);
+        backdrop-filter: blur(40px) saturate(180%);
+    }
+}
+
+@keyframes apple-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.apple-card__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.apple-logo {
+    display: grid;
+    place-items: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    margin-bottom: 1.25rem;
+    border-radius: 1.25rem;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--apple-stroke);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.10),
+        0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+.apple-logo__img {
+    width: 3.25rem;
+    height: 3.25rem;
+    object-fit: contain;
+}
+
+/* Tipografia: o h1 global é uppercase/Archivo Black, aqui sobrescrevemos por classe. */
+.apple-title {
+    margin: 0 0 0.5rem;
+    font-family: var(--apple-font);
+    font-optical-sizing: auto;
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;   /* texto grande: tracking negativo */
+    text-transform: none;
+    text-wrap: balance;
+    color: var(--apple-label);
+}
+
+.apple-subtitle {
+    margin: 0;
+    max-width: 20rem;
+    font-size: 0.9375rem;
+    font-weight: 400;
+    line-height: 1.45;
+    letter-spacing: 0;
+    text-wrap: balance;
+    color: var(--apple-label-secondary);
+}
+
+/* ---------- Formulário ---------- */
+.apple-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.apple-form .apple-button {
+    margin-top: 0.5rem;
+}
+
+/* ---------- Campo ---------- */
+.apple-field {
+    width: 100%;
+}
+
+.apple-field__label {
+    display: block;
+    margin: 0 0 0.5rem 0.25rem;
+    font-family: var(--apple-font);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: 0.01em;    /* texto pequeno: tracking levemente positivo */
+    color: var(--apple-label-secondary);
+}
+
+.apple-field__control {
+    position: relative;
+}
+
+.apple-field__input {
+    display: block;
+    width: 100%;
+    height: 3.25rem;
+    padding: 0 1rem;
+    border-radius: 0.875rem;
+    border: 1px solid var(--apple-stroke);
+    background: var(--apple-fill);   /* material claro sobre o cartão escuro */
+    color: var(--apple-label);
+    font-family: var(--apple-font);
+    font-size: 1rem;                 /* 16px: evita zoom automático no iOS */
+    font-weight: 400;
+    line-height: 1.25;
+    letter-spacing: -0.005em;
+    outline: none;
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow var(--apple-duration) var(--apple-spring);
+}
+
+.apple-field__input--has-end {
+    padding-right: 3.5rem;
+}
+
+.apple-field__input::placeholder {
+    color: var(--apple-label-tertiary);
+    font-weight: 400;
+}
+
+@media (hover: hover) {
+    .apple-field__input:hover:not(:focus):not(:disabled) {
+        background: var(--apple-fill-hover);
+    }
+}
+
+.apple-field__input:focus {
+    background: var(--apple-fill-hover);
+    border-color: var(--apple-accent);
+    box-shadow: 0 0 0 4px var(--apple-accent-ring);
+}
+
+.apple-field__input[aria-invalid="true"] {
+    border-color: rgba(255, 69, 58, 0.85);
+}
+
+.apple-field__input[aria-invalid="true"]:focus {
+    border-color: var(--apple-danger);
+    box-shadow: 0 0 0 4px rgba(255, 69, 58, 0.25);
+}
+
+.apple-field__input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Autofill do Chrome/Safari pinta o campo de amarelo/branco por padrão. */
+.apple-field__input:-webkit-autofill,
+.apple-field__input:-webkit-autofill:hover {
+    -webkit-text-fill-color: var(--apple-label);
+    caret-color: var(--apple-label);
+    box-shadow: inset 0 0 0 100px #232628;
+}
+
+.apple-field__input:-webkit-autofill:focus {
+    box-shadow: inset 0 0 0 100px #232628, 0 0 0 4px var(--apple-accent-ring);
+}
+
+.apple-field__end {
+    position: absolute;
+    top: 50%;
+    right: 0.375rem;
+    transform: translateY(-50%);
+}
+
+.apple-field__error {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin: 0.5rem 0 0 0.25rem;
+    font-family: var(--apple-font);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: 0.01em;
+    color: var(--apple-danger-text);
+    animation: apple-rise var(--apple-duration) var(--apple-spring) both;
+}
+
+.apple-field__error-icon {
+    flex: none;
+    width: 0.9375rem;
+    height: 0.9375rem;
+}
+
+@keyframes apple-rise {
+    from { opacity: 0; transform: translateY(-0.25rem); }
+    to { opacity: 1; transform: none; }
+}
+
+/* ---------- Botão de ícone (mostrar/ocultar senha) ---------- */
+.apple-icon-button {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;                  /* alvo de toque ≥ 44px */
+    height: 2.75rem;
+    border: 0;
+    border-radius: 0.625rem;
+    background: transparent;
+    color: var(--apple-label-tertiary);
+    touch-action: manipulation;
+    transition:
+        color 0.2s ease,
+        background-color 0.2s ease,
+        transform 0.1s ease-out;
+}
+
+.apple-icon-button svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+@media (hover: hover) {
+    .apple-icon-button:hover {
+        color: var(--apple-label);
+    }
+}
+
+.apple-icon-button:active {
+    transform: scale(0.92);          /* feedback no pointer-down, instantâneo */
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.apple-icon-button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--apple-accent-ring);
+    color: var(--apple-label);
+}
+
+/* ---------- Botão ---------- */
+.apple-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    overflow: hidden;
+    border: 0;
+    border-radius: 0.875rem;
+    background: var(--apple-accent);   /* cor sobre camada sólida, não sobre vidro */
+    color: rgba(0, 0, 0, 0.88);
+    font-family: var(--apple-font);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    touch-action: manipulation;        /* sem atraso de 300ms no toque */
+    outline: none;
+    transition:
+        transform var(--apple-duration) var(--apple-spring),
+        background-color 0.2s ease,
+        opacity 0.2s ease,
+        box-shadow var(--apple-duration) var(--apple-spring);
+}
+
+.apple-button--sm { height: 2.25rem; padding: 0 1rem;   font-size: 0.875rem; }
+.apple-button--md { height: 2.75rem; padding: 0 1.25rem; font-size: 0.9375rem; }
+.apple-button--lg { height: 3.25rem; padding: 0 1.5rem;  font-size: 1.0625rem; }
+
+@media (hover: hover) {
+    .apple-button:hover:not(:disabled) {
+        background: #33E1FF;
+    }
+}
+
+/* Feedback no pointer-down: imediato (100ms), volta com a mola ao soltar. */
+.apple-button:active:not(:disabled) {
+    transform: scale(0.97);
+    background: #00BFE0;
+    transition-duration: 0.1s, 0.1s, 0.2s, 0.1s;
+    transition-timing-function: ease-out;
+}
+
+.apple-button:focus-visible {
+    box-shadow: 0 0 0 3px #0A0A0A, 0 0 0 5px var(--apple-accent);
+}
+
+.apple-button:disabled:not([aria-busy="true"]) {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ---------- Rodapé ---------- */
+.apple-footer {
+    margin-top: 1.75rem;
+    text-align: center;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+    color: var(--apple-label-tertiary);
+}
+
+.apple-footer p {
+    margin: 0;
+}
+
+.apple-footer__brand {
+    color: var(--apple-accent);
+    font-weight: 500;
+}
+
+/* ---------- Acessibilidade ---------- */
+
+/* Sem suporte a backdrop-filter: cartão quase sólido para manter legibilidade. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .apple-card {
+        background: rgba(28, 28, 30, 0.94);
+    }
+}
+
+/* Movimento reduzido: troca deslocamento/escala/mola por cross-fade curto. */
+@media (prefers-reduced-motion: reduce) {
+    .apple-card {
+        animation: apple-fade 0.25s ease both;
+    }
+
+    .apple-field__error {
+        animation: apple-fade 0.2s ease both;
+    }
+
+    .apple-button,
+    .apple-icon-button,
+    .apple-field__input {
+        transition-duration: 0.15s;
+        transition-timing-function: ease;
+    }
+
+    .apple-button:active:not(:disabled),
+    .apple-icon-button:active {
+        transform: none;
+        opacity: 0.75;
+    }
+}
+
+/* Transparência reduzida: superfícies sólidas, sem blur. */
+@media (prefers-reduced-transparency: reduce) {
+    .apple-card {
+        background: #1C1C1E;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
+
+    .apple-field__input {
+        background: #2C2C2E;
+    }
+
+    .apple-login::before {
+        display: none;
+    }
+}
+
+/* Contraste aumentado: bordas definidas e texto no máximo. */
+@media (prefers-contrast: more) {
+    .apple-card {
+        background: #000000;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        border-color: rgba(255, 255, 255, 0.6);
+    }
+
+    .apple-field__input {
+        background: #1C1C1E;
+        border-color: rgba(255, 255, 255, 0.6);
+    }
+
+    .apple-field__input::placeholder,
+    .apple-field__label,
+    .apple-subtitle,
+    .apple-footer {
+        color: rgba(255, 255, 255, 0.85);
+    }
+}

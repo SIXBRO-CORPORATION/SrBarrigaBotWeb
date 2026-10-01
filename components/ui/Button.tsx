@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface ButtonRootProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+    variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'apple';
     size?: 'sm' | 'md' | 'lg';
     loading?: boolean;
     children: React.ReactNode;
@@ -16,13 +16,18 @@ const ButtonRoot: React.FC<ButtonRootProps> = ({
                                                    loading = false,
                                                    ...props
                                                }) => {
-    const baseStyles = 'tech-text font-normal transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 relative overflow-hidden border-2';
+    const isApple = variant === 'apple';
+
+    const baseStyles = isApple
+        ? `apple-button apple-button--${size}`
+        : 'tech-text font-normal transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 relative overflow-hidden border-2';
 
     const variantStyles = {
         primary: 'bg-white text-black border-white hover-glow hover:bg-transparent hover:text-white',
         secondary: 'bg-transparent text-white border-white hover-glow-accent hover:bg-white hover:text-black',
         ghost: 'bg-transparent text-white border-transparent hover:border-white hover-glow',
-        danger: 'bg-red-600 text-white border-red-600 hover-glow hover:bg-transparent hover:border-red-600'
+        danger: 'bg-red-600 text-white border-red-600 hover-glow hover:bg-transparent hover:border-red-600',
+        apple: ''
     };
 
     const sizeStyles = {
@@ -33,13 +38,14 @@ const ButtonRoot: React.FC<ButtonRootProps> = ({
 
     return (
         <button
-            className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
+            className={`${baseStyles} ${variantStyles[variant]} ${isApple ? '' : sizeStyles[size]} ${className}`}
             disabled={disabled || loading}
+            aria-busy={isApple && loading ? true : undefined}
             {...props}
         >
             {loading && (
                 <div className="absolute inset-0 bg-inherit flex items-center justify-center">
-                    <div className="w-5 h-5 border-2 border-current border-t-transparent animate-spin" />
+                    <div className={`w-5 h-5 border-2 border-current border-t-transparent animate-spin ${isApple ? 'rounded-full' : ''}`} />
                 </div>
             )}
             <span className={loading ? 'invisible' : 'flex items-center gap-2'}>
