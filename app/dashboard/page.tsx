@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { DashboardLayout } from '@/components/app/Layout';
-import { DashboardSummaryCards } from '@/components/app/DashboardSummaryCards';
+import { MoneyDashboard } from '@/components/app/MoneyDashboard';
 
 export default function DashboardPage() {
     return (
@@ -17,7 +17,7 @@ export default function DashboardPage() {
                     </p>
                 </div>
 
-                <DashboardSummaryCards />
+                <MoneyDashboard />
             </div>
         </DashboardLayout>
     );
