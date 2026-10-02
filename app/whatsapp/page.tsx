@@ -10,7 +10,6 @@ import { WhatsAppQRModal } from '@/components/app/WhatsAppQRModal';
 import { useWhatsAppWebSocket } from '@/hooks/useWhatsAppWebSocket';
 import { useExecuteCharge } from '@/hooks/useWhatsapp';
 import { useToast } from '@/providers/ToastProvider';
-import type { ChargeStatus } from '@/types/whatsapp';
 
 // Tempo para o usuário ver a animação de sucesso antes de o modal fechar.
 const QR_SUCCESS_CLOSE_DELAY_MS = 1800;
@@ -29,8 +28,7 @@ export default function WhatsAppPage() {
     } = useWhatsAppWebSocket();
 
     const executeChargeMutation = useExecuteCharge();
-    const { success, error: showError, info, warning } = useToast();
-    const previousChargeStatus = React.useRef<ChargeStatus | null>(null);
+    const { success, error: showError } = useToast();
     const [showQRModal, setShowQRModal] = useState(false);
     const [showDisconnectDialog, setShowDisconnectDialog] = useState(false);
     const [showChargeDialog, setShowChargeDialog] = useState(false);
@@ -83,25 +81,6 @@ export default function WhatsAppPage() {
         const timer = setTimeout(() => setShowQRModal(false), QR_SUCCESS_CLOSE_DELAY_MS);
         return () => clearTimeout(timer);
     }, [isConnected, showQRModal, success]);
-
-    React.useEffect(() => {
-        const previous = previousChargeStatus.current;
-        previousChargeStatus.current = charge.status;
-
-        if (previous !== 'running') return;
-
-        if (charge.status === 'completed') {
-            if (charge.total === 0) {
-                info('Nenhum aluno a cobrar no momento');
-            } else if (charge.failed > 0) {
-                warning(`Cobrança concluída: ${charge.sent} enviada(s) e ${charge.failed} com falha`, 8000);
-            } else {
-                success(`Cobrança concluída: ${charge.sent} mensagem(ns) enviada(s)`);
-            }
-        } else if (charge.status === 'failed') {
-            showError(charge.error || 'Falha ao executar cobrança', 8000);
-        }
-    }, [charge, info, warning, success, showError]);
 
     return (
         <DashboardLayout>

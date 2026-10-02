@@ -6,6 +6,7 @@ import { QueryProvider } from "@/providers/QueryProvider";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { ToastProvider } from "@/providers/ToastProvider";
+import { WhatsAppProvider } from "@/providers/WhatsAppProvider";
 
 const montserrat = Montserrat({
     variable: "--font-montserrat",
@@ -45,7 +46,9 @@ export default function RootLayout({
             <ToastProvider>
                 <QueryProvider>
                     <AuthProvider>
-                        {children}
+                        <WhatsAppProvider>
+                            {children}
+                        </WhatsAppProvider>
                     </AuthProvider>
                 </QueryProvider>
             </ToastProvider>

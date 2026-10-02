@@ -121,7 +121,7 @@ export function WhatsAppChargePanel({ charge, canRun, isStarting, onRun, classNa
                             variant="primary"
                             size="md"
                             onClick={onRun}
-                            loading={isRunning || isStarting}
+                            loading={isStarting}
                             disabled={!canRun || isRunning || isStarting}
                         >
                             <Button.Icon>

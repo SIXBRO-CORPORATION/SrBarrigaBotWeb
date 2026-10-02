@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Panel, PANEL_ACCENT, type PanelAccent } from '@/components/ui/Panel';
 import { WhatsAppStatusBadgeSkeleton, WhatsAppStatusBodySkeleton } from '@/components/app/WhatsAppSkeleton';
@@ -42,6 +42,72 @@ function getCopy(view: WhatsAppView, isConnecting: boolean): { title: string; te
     return { title: 'Nenhuma sessão ativa encontrada', text: 'Conecte seu WhatsApp para ativar o bot de lembretes' };
 }
 
+function DisconnectMenu({ onDisconnect, disabled, disabledReason }: { onDisconnect: () => void; disabled: boolean; disabledReason?: string }) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!open) return;
+
+        const handleClickOutside = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+        };
+        const handleEscape = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setOpen(false);
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('keydown', handleEscape);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleEscape);
+        };
+    }, [open]);
+
+    return (
+        <div className="relative" ref={ref}>
+            <button
+                type="button"
+                onClick={() => setOpen((v) => !v)}
+                aria-haspopup="menu"
+                aria-expanded={open}
+                aria-label="Mais opções"
+                className="w-9 h-9 flex items-center justify-center border-2 border-white/20 text-white/50 hover:text-white hover:border-white/40 transition-colors chamfer-sm"
+            >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="5" r="1.6" />
+                    <circle cx="12" cy="12" r="1.6" />
+                    <circle cx="12" cy="19" r="1.6" />
+                </svg>
+            </button>
+
+            {open && (
+                <div
+                    role="menu"
+                    className="absolute right-0 top-full mt-2 w-56 z-20 border-2 border-white/20 bg-[#0A0A0A] chamfer-sm animate-fade-in"
+                >
+                    <button
+                        type="button"
+                        role="menuitem"
+                        disabled={disabled}
+                        title={disabled ? disabledReason : undefined}
+                        onClick={() => {
+                            setOpen(false);
+                            onDisconnect();
+                        }}
+                        className="w-full flex items-center gap-2 px-4 py-3 text-left text-sm text-red-500 hover:bg-red-500/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                    >
+                        <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                            <path strokeLinecap="square" strokeLinejoin="miter" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        DESCONECTAR
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+}
+
 export function WhatsAppStatusPanel({
     view,
     isConnecting,
@@ -73,11 +139,21 @@ export function WhatsAppStatusPanel({
                     {isLoading ? (
                         <WhatsAppStatusBadgeSkeleton />
                     ) : (
-                        <div key={badge} className={`px-4 py-2 border-2 animate-fade-in ${style.border} ${style.tint}`}>
-                            <div className="flex items-center gap-2">
-                                <div className={`w-2 h-2 animate-pulse-soft ${style.frame}`} />
-                                <span className={`text-xs tech-text tracking-wider ${style.text}`}>{badge}</span>
+                        <div className="flex items-center gap-2 animate-fade-in">
+                            <div key={badge} className={`px-4 py-2 border-2 ${style.border} ${style.tint}`}>
+                                <div className="flex items-center gap-2">
+                                    <div className={`w-2 h-2 animate-pulse-soft ${style.frame}`} />
+                                    <span className={`text-xs tech-text tracking-wider ${style.text}`}>{badge}</span>
+                                </div>
                             </div>
+
+                            {view === 'connected' && (
+                                <DisconnectMenu
+                                    onDisconnect={onDisconnect}
+                                    disabled={isDisconnecting || isChargeRunning}
+                                    disabledReason={isChargeRunning ? 'Aguarde a cobrança terminar para desconectar' : undefined}
+                                />
+                            )}
                         </div>
                     )}
                 </div>
@@ -120,23 +196,6 @@ export function WhatsAppStatusPanel({
                                         </svg>
                                     </Button.Icon>
                                     <Button.Text>{isConnecting ? 'VER QR CODE' : 'CONECTAR WHATSAPP'}</Button.Text>
-                                </Button.Root>
-                            )}
-
-                            {view === 'connected' && (
-                                <Button.Root
-                                    variant="danger"
-                                    size="md"
-                                    onClick={onDisconnect}
-                                    disabled={isDisconnecting || isChargeRunning}
-                                    title={isChargeRunning ? 'Aguarde a cobrança terminar para desconectar' : undefined}
-                                >
-                                    <Button.Icon>
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-                                            <path strokeLinecap="square" strokeLinejoin="miter" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </Button.Icon>
-                                    <Button.Text>DESCONECTAR</Button.Text>
                                 </Button.Root>
                             )}
                         </div>
