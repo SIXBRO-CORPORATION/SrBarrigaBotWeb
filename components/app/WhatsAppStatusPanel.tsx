@@ -4,11 +4,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Panel, PANEL_ACCENT, type PanelAccent } from '@/components/ui/Panel';
 import { WhatsAppStatusBadgeSkeleton, WhatsAppStatusBodySkeleton } from '@/components/app/WhatsAppSkeleton';
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 
 export type WhatsAppView = 'loading' | 'offline' | 'connected' | 'disconnected';
-
-const CHAT_ICON =
-    'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z';
 
 interface WhatsAppStatusPanelProps {
     view: WhatsAppView;
@@ -176,9 +174,7 @@ export function WhatsAppStatusPanel({
                                     isConnecting ? 'animate-pulse-soft' : ''
                                 }`}
                             >
-                                <svg className="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                                    <path strokeLinecap="square" strokeLinejoin="miter" d={CHAT_ICON} />
-                                </svg>
+                                <WhatsAppIcon className="w-9 h-9" />
                             </div>
                         </div>
 

@@ -5,6 +5,7 @@ import QRCode from 'react-qr-code';
 import { Modal } from '@/components/ui/Modal';
 import { Loading } from '@/components/ui/Loading';
 import { LottiePlayer } from '@/components/ui/LottiePlayer';
+import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 
 const STEPS = [
     'Abra o WhatsApp no seu celular',
@@ -36,9 +37,18 @@ export function WhatsAppQRModal({ open, onClose, qrCode, isConnected }: WhatsApp
 
                 <div className={`relative p-6 border-b-2 ${accentSoft}`}>
                     <div className="flex items-center justify-between">
-                        <h2 className="text-xl text-white">
-                            {phase === 'connected' ? 'WHATSAPP CONECTADO' : 'CONECTAR WHATSAPP'}
-                        </h2>
+                        <div className="flex items-center gap-3">
+                            <div
+                                className={`w-8 h-8 shrink-0 flex items-center justify-center chamfer-sm border ${accentSoft} ${
+                                    phase === 'connected' ? 'text-green-500' : 'text-white'
+                                }`}
+                            >
+                                <WhatsAppIcon className="w-4 h-4" />
+                            </div>
+                            <h2 className="text-xl text-white">
+                                {phase === 'connected' ? 'WHATSAPP CONECTADO' : 'CONECTAR WHATSAPP'}
+                            </h2>
+                        </div>
                         <button
                             onClick={onClose}
                             className="text-white/50 hover:text-white transition-colors"
