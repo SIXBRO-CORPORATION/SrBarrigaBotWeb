@@ -22,6 +22,7 @@ export const useWhatsAppWebSocket = () => {
     const [isDisconnecting, setIsDisconnecting] = useState(false);
     const [isExecutingCharge, setIsExecutingCharge] = useState(false);
     const [isLoadingInitialStatus, setIsLoadingInitialStatus] = useState(true);
+    const [isSocketOnline, setIsSocketOnline] = useState(false);
     const [charge, setCharge] = useState<ChargeProgress>({
         status: 'idle',
         total: 0,
@@ -53,10 +54,17 @@ export const useWhatsAppWebSocket = () => {
 
         socket.on('connect', () => {
             console.log('WebSocket connected');
+            setIsSocketOnline(true);
         });
 
         socket.on('disconnect', () => {
             console.log('WebSocket disconnected');
+            setIsSocketOnline(false);
+        });
+
+        socket.on('connect_error', () => {
+            setIsSocketOnline(false);
+            setIsLoadingInitialStatus(false);
         });
 
         socket.on('whatsapp:status', (data: WhatsAppStatus) => {
@@ -148,6 +156,7 @@ export const useWhatsAppWebSocket = () => {
         isConnecting,
         isDisconnecting,
         isLoadingInitialStatus,
+        isSocketOnline,
         charge,
         connect,
         disconnect,

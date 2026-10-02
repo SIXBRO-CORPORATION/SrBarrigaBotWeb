@@ -230,6 +230,27 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
+/* Pulso de radar (ícone de status conectado) e linha de leitura do QR Code */
+@keyframes radar {
+    0% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+@keyframes scan {
+    0%, 100% {
+        top: 0;
+    }
+    50% {
+        top: calc(100% - 2px);
+    }
+}
+
 /* Novas animações para loaders clean */
 @keyframes lineLoader {
     0% {
@@ -289,6 +310,14 @@ h1, h2, h3, h4, h5, h6 {
 
 .animate-glow {
     animation: glowPulse 2s ease-in-out infinite;
+}
+
+.animate-radar {
+    animation: radar 2.4s ease-out infinite;
+}
+
+.animate-scan {
+    animation: scan 3s ease-in-out infinite;
 }
 
 .animate-line-loader {
