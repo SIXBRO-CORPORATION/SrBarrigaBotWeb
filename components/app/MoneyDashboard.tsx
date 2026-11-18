@@ -102,7 +102,9 @@ function HeroPanel({ summary }: { summary: DashboardSummary }) {
                 <p className="font-heading text-3xl sm:text-5xl xl:text-6xl text-white text-glow tabular-nums leading-none">
                     {formatCurrency(total)}
                 </p>
-                <p className="text-xs text-white/40 body-text mt-3">Total de pagamentos registrados</p>
+                <p className="text-xs text-white/40 body-text mt-3">
+                    Pagamentos + lucros ({formatCurrency(summary.totalLucros)}) − gastos ({formatCurrency(summary.totalGastos)})
+                </p>
 
                 <div className="mt-8">
                     <div className="flex items-baseline justify-between gap-4 mb-2">

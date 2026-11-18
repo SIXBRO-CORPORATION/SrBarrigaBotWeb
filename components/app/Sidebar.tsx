@@ -55,6 +55,15 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             )
         },
         {
+            name: 'LANÇAMENTOS',
+            path: '/entries',
+            icon: (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                    <path strokeLinecap="square" strokeLinejoin="miter" d="M9 7h6m-6 4h6m-6 4h4M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2V3z" />
+                </svg>
+            ),
+        },
+        {
             name: 'COMISSÃO',
             path: '/comittee',
             icon: (
